@@ -88,12 +88,9 @@ int vmap_page_range(struct pcb_t *caller,           // process call
                     struct vm_rg_struct *ret_rg)    // return mapped region, the real mapped fp
 {  
   
-  if(pagenum<=0) return -1;
-  struct framephy_struct *fpit = malloc(sizeof(struct framephy_struct));
-  fpit->fp_next=frames;
+  if(pgnum<=0) return -1;
   int pgit = 0;
   int pgn = PAGING_PGN(addr);
-
   /* TODO: update the rg_end and rg_start of ret_rg 
   //ret_rg->rg_end =  ....
   //ret_rg->rg_start = ...
@@ -102,30 +99,28 @@ int vmap_page_range(struct pcb_t *caller,           // process call
 ret_rg->rg_start=addr;
 ret_rg->rg_end=addr;
 
-while(fpit->fp_next!=NULL)
-{
-  fpit=fpit->fp_next;
-  fpn=fpit->fpn;
-
-  caller->mm->pgd[pgn+pgit]=0;
-  pte_set_fpn(&caller->mm->pgd[pgn+pgit], fpn);
-  enlist_pgn_node(&caller->mm->fifo_pgn, pgn+pgit);
-  ret_rg->rg_end += PAGING_PAGESZ;
-
-  if(pgit==pagenum) break;
-
-  pgit++;
-}
-
-
   /* TODO map range of frame to address space
    *      [addr to addr + pgnum*PAGING_PAGESZ
    *      in page table caller->mm->pgd[]
    */
+   
+   struct framephy_struct* tmp = frames;
+   while (!tmp) 
+   {
 
+     uint32_t pte = 0;
+     pte_set_fpn(&pte, tmp->fpn);
+     caller->mm->pgd[pgit + pgn] = pte;
+     enlist_pgn_node(&caller->mm->fifo_pgn, tmp->fpn);
+     ret_rg->rg_end = ret_rg->rg_end + PAGING_PAGESZ;
+     pgit++;
+     tmp = tmp->fp_next;
+ }
   /* Tracking for later page replacement activities (if needed)
    * Enqueue new usage page */
  // enlist_pgn_node(&caller->mm->fifo_pgn, pgn + pgit);
+ enlist_pgn_node(&caller->mm->fifo_pgn, pgn + pgit);
+
   return 0;
 }
 
