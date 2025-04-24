@@ -101,7 +101,7 @@ if(cur_vma==NULL)
   //int inc_limit_ret;
 
   /* TODO retrive old_sbrk if needed, current comment out due to compiler redundant warning*/
-  int old_sbrk = cur_vma->sbrk;
+  //int old_sbrk = cur_vma->sbrk;
 
   /* TODO INCREASE THE LIMIT as inovking systemcall 
    * sys_memap with SYSMEM_INC_OP 
@@ -248,7 +248,7 @@ int pg_getpage(struct mm_struct *mm, int pgn, int *fpn, struct pcb_t *caller)
   int ret = syscall(caller,17,&regs);
   if(ret<0)
   {
-    printf("failed to swap vicfpn and tgtfpn")
+    printf("failed to swap vicfpn and tgtfpn");
     return -1;
   }
     /* Update page table */
@@ -291,14 +291,14 @@ int pg_getval(struct mm_struct *mm, int addr, BYTE *data, struct pcb_t *caller)
    */
   // int phyaddr
   struct sc_regs regs;
-  regs.a1 = SYSMEM_IO_READ
+  regs.a1 = SYSMEM_IO_READ;
   regs.a2 = fpn;
   //regs.a3 = 
 
   /* SYSCALL 17 sys_memmap */
  if(syscall(caller,17,&regs)<0) 
  {
-  printf("failed to read data")
+  printf("failed to read data");
   return -1;
  }
   // Update data 
@@ -500,9 +500,9 @@ int get_free_vmrg_area(struct pcb_t *caller, int vmaid, int size, struct vm_rg_s
   //while (...)
   // ..
 
-  while(rigit!=NULL)
+  while(rgit!=NULL)
   {
-    int diff= rigit->rg_end - rigit->rg_start;
+    int diff= rgit->rg_end - rgit->rg_start;
     if(diff>=size)
     {  
       newrg->rg_start = rgit->rg_start;
@@ -510,7 +510,7 @@ int get_free_vmrg_area(struct pcb_t *caller, int vmaid, int size, struct vm_rg_s
       newrg->rg_next = NULL;
       return 0;
     }
-    rigit=rigit->next;
+    rgit=rgit->rg_next;
   }
  
   return -1;
