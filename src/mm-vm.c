@@ -89,7 +89,7 @@ int validate_overlap_vm_area(struct pcb_t *caller, int vmaid, int vmastart, int 
       return -1;
      }
 
-    vma=vma->next;
+    vma = vma->vm_next;
   }
 
   return 0;
