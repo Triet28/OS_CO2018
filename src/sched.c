@@ -1,4 +1,3 @@
-
 #include "queue.h"
 #include "sched.h"
 #include <pthread.h>
@@ -46,7 +45,7 @@ void init_scheduler(void) {
  *  We implement stateful here using transition technique
  *  State representation   prio = 0 .. MAX_PRIO, curr_slot = 0..(MAX_PRIO - prio)
  */
-struct pcb_t *get_mlq_proc(void)
+struct pcb_t *get_mlq_proc(void)                                          //Nguyễn Huy Bách - MSSV:2310198
 {
 	struct pcb_t *proc = NULL;
 	/*TODO: get a process from PRIORITY [ready_queue].
@@ -91,7 +90,7 @@ struct pcb_t * get_proc(void) {
 	return get_mlq_proc();
 }
 
-void put_proc(struct pcb_t *proc)
+void put_proc(struct pcb_t *proc)                                   //Nguyễn Huy Bách - MSSV:2310198
 {
 	proc->ready_queue = &ready_queue;
 	proc->mlq_ready_queue = mlq_ready_queue;
@@ -106,7 +105,7 @@ void put_proc(struct pcb_t *proc)
 	return put_mlq_proc(proc);
 }
 
-void add_proc(struct pcb_t *proc)
+void add_proc(struct pcb_t *proc)                                  //Nguyễn Huy Bách - MSSV:2310198
 {
 	proc->ready_queue = &ready_queue;
 	proc->mlq_ready_queue = mlq_ready_queue;
@@ -121,7 +120,7 @@ void add_proc(struct pcb_t *proc)
 	return add_mlq_proc(proc);
 }
 #else
-struct pcb_t *get_proc(void)
+struct pcb_t *get_proc(void)                                      //Nguyễn Huy Bách - MSSV:2310198
 {
 	struct pcb_t *proc = NULL;
 	/*TODO: get a process from [ready_queue].
@@ -135,7 +134,7 @@ struct pcb_t *get_proc(void)
 	return proc;
 }
 
-void put_proc(struct pcb_t *proc)
+void put_proc(struct pcb_t *proc)                                //Nguyễn Huy Bách - MSSV:2310198
 {
 	proc->ready_queue = &ready_queue;
 	proc->running_list = &running_list;
@@ -144,13 +143,13 @@ void put_proc(struct pcb_t *proc)
 
 	pthread_mutex_lock(&queue_lock);
 
-	enqueue(&running_list, proc); //<==== được thêm
+	enqueue(&running_list, proc); 
 
 	enqueue(&run_queue, proc);
 	pthread_mutex_unlock(&queue_lock);
 }
 
-void add_proc(struct pcb_t *proc)
+void add_proc(struct pcb_t *proc)                                //Nguyễn Huy Bách - MSSV:2310198
 {
 	proc->ready_queue = &ready_queue;
 	proc->running_list = &running_list;
@@ -159,7 +158,7 @@ void add_proc(struct pcb_t *proc)
 
 	pthread_mutex_lock(&queue_lock);
 
-	enqueue(&running_list, proc); //<==== được thêm
+	enqueue(&running_list, proc); 
 
 	enqueue(&ready_queue, proc);
 	pthread_mutex_unlock(&queue_lock);
