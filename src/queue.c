@@ -9,14 +9,15 @@ int empty(struct queue_t *q)
         return (q->size == 0);
 }
 
-void enqueue(struct queue_t *q, struct pcb_t *proc)    //Nguyễn Huy Bách - MSSV:2310198
+/*Nguyễn Huy Bách - MSSV:2310198*/
+void enqueue(struct queue_t *q, struct pcb_t *proc)    
 {
         /* TODO: put a new process to queue [q] */
         q->proc[q->size] = proc;
         q->size++;
 }
 
-struct pcb_t *dequeue(struct queue_t *q)               //Nguyễn Huy Bách - MSSV:2310198
+struct pcb_t *dequeue(struct queue_t *q)               
 {
         /* TODO: return a pcb whose prioprity is the highest
          * in the queue [q] and remember to remove it from q
@@ -34,3 +35,4 @@ struct pcb_t *dequeue(struct queue_t *q)               //Nguyễn Huy Bách - MS
         q->size--;
         return tmp;
 }
+/*------------------------------------------------------------------------------*/
