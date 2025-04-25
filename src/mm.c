@@ -1,3 +1,5 @@
+//Tran Gia Bao Anh 2310148
+
 // #ifdef MM_PAGING
 /*
  * PAGING based Memory Management
@@ -97,29 +99,24 @@ int vmap_page_range(struct pcb_t *caller,           // process call
   //ret_rg->vmaid = ...
   */
 ret_rg->rg_start=addr;
-ret_rg->rg_end=addr;
+ret_rg->rg_end = addr + pgnum * PAGING_PAGESZ;
 
   /* TODO map range of frame to address space
    *      [addr to addr + pgnum*PAGING_PAGESZ
    *      in page table caller->mm->pgd[]
    */
    
-   struct framephy_struct* tmp = frames;
-   while (!tmp) 
+   struct framephy_struct* fpit = frames;
+   for (pgit=0; pgit<pgnum; pgit++)
    {
-
-     uint32_t pte = 0;
-     pte_set_fpn(&pte, tmp->fpn);
-     caller->mm->pgd[pgit + pgn] = pte;
-     enlist_pgn_node(&caller->mm->fifo_pgn, tmp->fpn);
-     ret_rg->rg_end = ret_rg->rg_end + PAGING_PAGESZ;
-     pgit++;
-     tmp = tmp->fp_next;
- }
+     if(fpit==NULL) return -1;
+     pte_set_fpn(&caller->mm->pgd[pgn + pgit], fpit->fpn);
+     fpit = fpit->fp_next;
+     enlist_pgn_node(&caller->mm->fifo_pgn, pgn + pgit);
+   }
   /* Tracking for later page replacement activities (if needed)
    * Enqueue new usage page */
  // enlist_pgn_node(&caller->mm->fifo_pgn, pgn + pgit);
- enlist_pgn_node(&caller->mm->fifo_pgn, pgn + pgit);
 
   return 0;
 }
@@ -136,10 +133,8 @@ int alloc_pages_range(struct pcb_t *caller, int req_pgnum, struct framephy_struc
   if(req_pgnum<=0) return 0;
   
   int pgit, fpn;
-  struct framephy_struct *newfp_str = NULL;// malloc(sizeof(struct framephy_struct));
-
-
-
+  struct framephy_struct *newfp_str = NULL;
+  *frm_lst = NULL;
 
   /* TODO: allocate the page 
   //caller-> ...
@@ -150,29 +145,18 @@ int alloc_pages_range(struct pcb_t *caller, int req_pgnum, struct framephy_struc
   {
   /* TODO: allocate the page 
    */
-    if (MEMPHY_get_freefp(caller->mram, &fpn) == 0)
-    {
-      newfp_str=malloc(sizeof(struct framephy_struct));
-      newfp_str->fpn=fpn;
-      newfp_str->owner = caller->mm;
-      newfp_str->fp_next= (*frm_lst);
-      *frm_lst = newfp_str;
+   newfp_str = malloc(sizeof(struct framephy_struct));
+   if(newfp_str==NULL) return -1;
+   if (MEMPHY_get_freefp(caller->mram, &fpn) != 0) 
+    { 
+      return -3000;  // Not enough frames available
     }
-    else
-    { // TODO: ERROR CODE of obtaining somes but not enough frames
-      newfp_str = *frm_lst;
-      while(MEMPHY_put_freefp(caller->mram, fpn) !=-1)
-      {
-        newfp_str= newfp_str->fp_next;
-        free(*frm_lst);
-        *frm_lst= newfp_str;
-      }
-      printf("Error! Not enough frames!");
-      return -1;
-    }
+    newfp_str->fpn=fpn;
+    newfp_str->fp_next = *frm_lst;
+    *frm_lst = newfp_str;
   }
   return 0;
-}
+ }
 
 /*
  * vm_map_ram - do the mapping all vm are to ram storage device
@@ -247,10 +231,22 @@ int __swap_cp_page(struct memphy_struct *mpsrc, int srcfpn,
  */
 int init_mm(struct mm_struct *mm, struct pcb_t *caller)
 {
-  struct vm_area_struct *vma0 = malloc(sizeof(struct vm_area_struct));
-
   mm->pgd = malloc(PAGING_MAX_PGN * sizeof(uint32_t));
+  if(mm->pgd==NULL) 
+  {
+    return -1;
+  }
+  else
+  {
+    for (int i = 0; i < PAGING_MAX_PGN; i++) 
+    {
+      mm->pgd[i] = 0;
+    }
+  }
 
+
+  struct vm_area_struct *vma0 = malloc(sizeof(struct vm_area_struct));
+  if(vma0==NULL) return -1;
   /* By default the owner comes with at least one vma */
   vma0->vm_id = 0;
   vma0->vm_start = 0;
